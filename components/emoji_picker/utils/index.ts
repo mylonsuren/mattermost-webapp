@@ -7,7 +7,6 @@ import {Emoji, EmojiCategory} from 'mattermost-redux/types/emojis';
 
 import {
     Categories,
-    CategoriesOffsets,
     Category,
     CategoryOrEmojiRow,
 } from 'components/emoji_picker/types';
@@ -18,9 +17,7 @@ import {compareEmojis} from 'utils/emoji_utils';
 import EmojiMap from 'utils/emoji_map';
 
 import {
-    CATEGORY_HEADER_ROW_HEIGHT,
     EMOJI_PER_ROW,
-    ITEM_HEIGHT,
     CATEGORY_HEADER_ROW,
     EMOJIS_ROW,
     SEARCH_RESULTS,
@@ -206,65 +203,6 @@ export function getAllEmojis(
     }
 
     return [categories, allEmojis];
-}
-
-/**
- * Returns the emoji category for the given emoji.
- * @param allEmoji the map of all emojis
- * @param categories all categories with includes emojiIds of each category
- * @returns object consisting of arrays of categories, offsets, rowIndices, numOfEmojis
- */
-export function calculateCategoryOffsetsAndIndices(
-    allEmojis: Record<string, Emoji>,
-    categories: Categories,
-) {
-    // For a given 'i' index categories[i], its offset and row indices lie at offset[i] and rowIndices[i] respectively
-    // following data structure makes easier to compare offsets
-    const categoriesOffsetsAndIndices: CategoriesOffsets = {
-        categories: [],
-        offsets: [], // offsets of each category from the top
-        rowIndices: [0], // category row index in list
-        numOfEmojis: [], // number of emojis in each category
-    };
-
-    if (isEmpty(allEmojis) || isEmpty(categories)) {
-        return categoriesOffsetsAndIndices;
-    }
-
-    let allPreviousCategoriesOffsets = 0;
-    let allPreviousCategoriesRowIndices = 0;
-
-    Object.keys(categories).forEach((category) => {
-        const emojiIds = categories[category as EmojiCategory]?.emojiIds ?? [];
-
-        const numberOfEmojiRows = Math.ceil(emojiIds.length / EMOJI_PER_ROW);
-
-        // allPreviousCategoriesOffsets is added to each category offset since a category's offset
-        // is equal to all previous offset + current category's offset
-        const approxRowsHeightTillNextCategory =
-            allPreviousCategoriesOffsets +
-            numberOfEmojiRows * ITEM_HEIGHT +
-            CATEGORY_HEADER_ROW_HEIGHT;
-        allPreviousCategoriesOffsets = approxRowsHeightTillNextCategory;
-
-        categoriesOffsetsAndIndices.categories.push(category as EmojiCategory);
-        categoriesOffsetsAndIndices.offsets.push(
-            approxRowsHeightTillNextCategory,
-        );
-        categoriesOffsetsAndIndices.numOfEmojis.push(emojiIds.length);
-
-        // Skip the end row of the custom category for row indices, which we dont scroll to.
-        if (category !== 'custom') {
-            // one is added in the end for category header row
-            const nextCategoryIndex =
-                allPreviousCategoriesRowIndices + numberOfEmojiRows + 1;
-            allPreviousCategoriesRowIndices = nextCategoryIndex;
-
-            categoriesOffsetsAndIndices.rowIndices.push(nextCategoryIndex);
-        }
-    });
-
-    return categoriesOffsetsAndIndices;
 }
 
 export function calculateCategoryRowIndex(categories: Categories, categoryName: EmojiCategory) {

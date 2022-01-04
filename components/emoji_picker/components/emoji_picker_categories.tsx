@@ -8,26 +8,25 @@ import {EmojiCategory} from 'mattermost-redux/types/emojis';
 import {
     Categories,
     CategoryOrEmojiRow,
-    EmojiCursorDirection,
+    NavigateDirection,
 } from 'components/emoji_picker/types';
 
 import {
-    CURSOR_DIRECTION,
-    EMOJI_PER_ROW,
+    NAVIGATE_TO_NEXT_EMOJI,
+    NAVIGATE_TO_NEXT_EMOJI_ROW,
+    NAVIGATE_TO_PREVIOUS_EMOJI,
+    NAVIGATE_TO_PREVIOUS_EMOJI_ROW,
 } from 'components/emoji_picker/constants';
 import {calculateCategoryRowIndex} from 'components/emoji_picker/utils';
 
 import EmojiPickerCategory from 'components/emoji_picker/components/emoji_picker_category';
 
 interface Props {
-    categories: Categories;
     isFiltering: boolean;
     active: EmojiCategory;
+    categories: Categories;
     onClick: (categoryRowIndex: CategoryOrEmojiRow['index'], categoryIndex: number, categoryName: EmojiCategory, firstEmojiId: string) => void;
-    selectNextOrPrevEmoji: (
-        offset: number,
-        direction: EmojiCursorDirection
-    ) => void;
+    onKeyDown: (moveTo: NavigateDirection) => void;
     focusOnSearchInput: () => void;
 }
 
@@ -36,26 +35,26 @@ function EmojiPickerCategories({
     isFiltering,
     active,
     onClick,
-    selectNextOrPrevEmoji,
+    onKeyDown,
     focusOnSearchInput,
 }: Props) {
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
         switch (event.key) {
         case 'ArrowRight':
             event.preventDefault();
-            selectNextOrPrevEmoji(1, CURSOR_DIRECTION.NEXT);
+            onKeyDown(NAVIGATE_TO_NEXT_EMOJI);
             break;
         case 'ArrowLeft':
             event.preventDefault();
-            selectNextOrPrevEmoji(1, CURSOR_DIRECTION.PREVIOUS);
+            onKeyDown(NAVIGATE_TO_PREVIOUS_EMOJI);
             break;
         case 'ArrowUp':
             event.preventDefault();
-            selectNextOrPrevEmoji(EMOJI_PER_ROW, CURSOR_DIRECTION.PREVIOUS);
+            onKeyDown(NAVIGATE_TO_PREVIOUS_EMOJI_ROW);
             break;
         case 'ArrowDown':
             event.preventDefault();
-            selectNextOrPrevEmoji(EMOJI_PER_ROW, CURSOR_DIRECTION.NEXT);
+            onKeyDown(NAVIGATE_TO_NEXT_EMOJI_ROW);
             break;
         }
 

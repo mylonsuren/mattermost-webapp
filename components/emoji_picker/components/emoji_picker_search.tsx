@@ -9,12 +9,12 @@ import React, {
 } from 'react';
 import {FormattedMessage} from 'react-intl';
 
+import {NavigateDirection} from 'components/emoji_picker/types';
+
 import {t} from 'utils/i18n';
+import {EMOJI_PER_ROW, NAVIGATE_TO_NEXT_EMOJI, NAVIGATE_TO_NEXT_EMOJI_ROW, NAVIGATE_TO_PREVIOUS_EMOJI, NAVIGATE_TO_PREVIOUS_EMOJI_ROW} from 'components/emoji_picker/constants';
 
 import LocalizedInput from 'components/localized_input/localized_input';
-
-import {EMOJI_PER_ROW, CURSOR_DIRECTION} from '../constants';
-import {EmojiCursorDirection} from '../types';
 
 interface Props {
     value: string;
@@ -23,19 +23,19 @@ interface Props {
     cursorEmojiIndex: number;
     focus: () => void;
     onEnter: () => void;
-    handleFilterChange: (value: string) => void;
+    onChange: (value: string) => void;
+    onKeyDown: (moveTo: NavigateDirection) => void;
     resetCursorPosition: () => void;
-    selectNextOrPrevEmoji: (offset: number, direction: EmojiCursorDirection) => void;
     searchCustomEmojis: (value: string) => void;
 }
 
-const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmojisEnabled, cursorCategoryIndex, cursorEmojiIndex, handleFilterChange, resetCursorPosition, selectNextOrPrevEmoji, focus, onEnter, searchCustomEmojis}: Props, ref) => {
+const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmojisEnabled, cursorCategoryIndex, cursorEmojiIndex, onChange, resetCursorPosition, onKeyDown, focus, onEnter, searchCustomEmojis}: Props, ref) => {
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
 
         // remove trailing and leading colons
         const value = event.target.value.toLowerCase().replace(/^:|:$/g, '');
-        handleFilterChange(value);
+        onChange(value);
 
         if (customEmojisEnabled && value && value.trim().length) {
             searchCustomEmojis(value);
@@ -50,13 +50,13 @@ const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmo
             // If the cursor is at the end of the textbox and an emoji is currently selected, move it to the next emoji
             if ((event.currentTarget?.selectionStart ?? 0) + 1 > value.length || (cursorEmojiIndex !== -1 || cursorCategoryIndex !== -1)) {
                 event.preventDefault();
-                selectNextOrPrevEmoji(1, CURSOR_DIRECTION.NEXT);
+                onKeyDown(NAVIGATE_TO_NEXT_EMOJI);
             }
             break;
         case 'ArrowLeft':
             if (cursorCategoryIndex > 0 || cursorEmojiIndex > 0) {
                 event.preventDefault();
-                selectNextOrPrevEmoji(1, CURSOR_DIRECTION.PREVIOUS);
+                onKeyDown(NAVIGATE_TO_PREVIOUS_EMOJI);
             } else if (cursorCategoryIndex === 0 && cursorEmojiIndex === 0) {
                 resetCursorPosition();
                 event.currentTarget.selectionStart = value.length;
@@ -82,7 +82,7 @@ const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmo
                 focus();
             } else {
                 // Otherwise, move the emoji selector up a row.
-                selectNextOrPrevEmoji(EMOJI_PER_ROW, CURSOR_DIRECTION.PREVIOUS);
+                onKeyDown(NAVIGATE_TO_PREVIOUS_EMOJI_ROW);
             }
             break;
         case 'ArrowDown':
@@ -96,7 +96,7 @@ const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmo
                 event.currentTarget.selectionEnd = value.length;
             } else {
                 // Otherwise, move the selection down in the emoji picker.
-                selectNextOrPrevEmoji(EMOJI_PER_ROW, CURSOR_DIRECTION.NEXT);
+                onKeyDown(NAVIGATE_TO_NEXT_EMOJI_ROW);
             }
             break;
         case 'Enter': {

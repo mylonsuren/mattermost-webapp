@@ -6,6 +6,10 @@ import {EmojiCategory, Emoji} from 'mattermost-redux/types/emojis';
 import {
     CATEGORY_HEADER_ROW,
     EMOJIS_ROW,
+    NAVIGATE_TO_NEXT_EMOJI,
+    NAVIGATE_TO_NEXT_EMOJI_ROW,
+    NAVIGATE_TO_PREVIOUS_EMOJI,
+    NAVIGATE_TO_PREVIOUS_EMOJI_ROW,
 } from 'components/emoji_picker/constants';
 
 export type Category = {
@@ -36,13 +40,6 @@ export type CategoryOrEmojiRow<
     }>;
 };
 
-export type CategoriesOffsets = {
-    categories: EmojiCategory[];
-    offsets: number[];
-    rowIndices: number[];
-    numOfEmojis: number[];
-};
-
 export type EmojiCursor = {
     rowIndex: number;
     categoryIndex: number;
@@ -51,4 +48,4 @@ export type EmojiCursor = {
     emoji: Emoji | undefined;
 };
 
-export type EmojiCursorDirection = 'next' | 'previous';
+export type NavigateDirection = typeof NAVIGATE_TO_NEXT_EMOJI | typeof NAVIGATE_TO_PREVIOUS_EMOJI | typeof NAVIGATE_TO_NEXT_EMOJI_ROW | typeof NAVIGATE_TO_PREVIOUS_EMOJI_ROW;

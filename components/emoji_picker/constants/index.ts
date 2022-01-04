@@ -5,7 +5,7 @@ import {EmojiCategory} from 'mattermost-redux/types/emojis';
 
 import * as Emoji from 'utils/emoji.jsx';
 
-import {Category, Categories, EmojiCursorDirection} from '../types';
+import {Category, Categories} from '../types';
 
 export const RECENT = 'recent';
 export const SEARCH_RESULTS = 'searchResults';
@@ -52,10 +52,10 @@ export const EMOJI_PER_ROW = 9; // needs to match variable `$emoji-per-row` in _
 export const ITEM_HEIGHT = 36; //as per .emoji-picker__item height in _emoticons.scss
 export const EMOJI_CONTAINER_HEIGHT = 290; // If this changes, the spaceRequiredAbove and spaceRequiredBelow props passed to the EmojiPickerOverlay must be updated
 
-export const CURSOR_DIRECTION: Record<'NEXT' | 'PREVIOUS', EmojiCursorDirection> = {
-    NEXT: 'next',
-    PREVIOUS: 'previous',
-};
+export const NAVIGATE_TO_NEXT_EMOJI = 'next-emoji';
+export const NAVIGATE_TO_PREVIOUS_EMOJI = 'previous-emoji';
+export const NAVIGATE_TO_NEXT_EMOJI_ROW = 'next-emoji-row';
+export const NAVIGATE_TO_PREVIOUS_EMOJI_ROW = 'previous-emoji-row';
 
 export const CATEGORY_HEADER_ROW = 'categoryHeaderRow';
 export const EMOJIS_ROW = 'emojisRow';
