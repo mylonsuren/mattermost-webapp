@@ -18,17 +18,18 @@ import {EmojiCursorDirection} from '../types';
 
 interface Props {
     value: string;
+    customEmojisEnabled: boolean;
+    cursorCategoryIndex: number;
+    cursorEmojiIndex: number;
     focus: () => void;
     onEnter: () => void;
-    customEmojisEnabled: boolean;
-    cursor: [number, number];
     handleFilterChange: (value: string) => void;
     resetCursorPosition: () => void;
     selectNextOrPrevEmoji: (offset: number, direction: EmojiCursorDirection) => void;
     searchCustomEmojis: (value: string) => void;
 }
 
-const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmojisEnabled, cursor, handleFilterChange, resetCursorPosition, selectNextOrPrevEmoji, focus, onEnter, searchCustomEmojis}: Props, ref) => {
+const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmojisEnabled, cursorCategoryIndex, cursorEmojiIndex, handleFilterChange, resetCursorPosition, selectNextOrPrevEmoji, focus, onEnter, searchCustomEmojis}: Props, ref) => {
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
 
@@ -46,40 +47,38 @@ const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmo
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         switch (event.key) {
         case 'ArrowRight':
-            if ((cursor[0] !== -1 || cursor[1] !== -1) || (event.currentTarget?.selectionStart ?? 0) + 1 > value.length) {
+            // If the cursor is at the end of the textbox and an emoji is currently selected, move it to the next emoji
+            if ((event.currentTarget?.selectionStart ?? 0) + 1 > value.length || (cursorEmojiIndex !== -1 || cursorCategoryIndex !== -1)) {
                 event.preventDefault();
                 selectNextOrPrevEmoji(1, CURSOR_DIRECTION.NEXT);
             }
             break;
         case 'ArrowLeft':
-            if (cursor[0] > 0 || cursor[1] > 0) {
+            if (cursorCategoryIndex > 0 || cursorEmojiIndex > 0) {
                 event.preventDefault();
                 selectNextOrPrevEmoji(1, CURSOR_DIRECTION.PREVIOUS);
-            } else if (cursor[0] === 0 && cursor[1] === 0) {
+            } else if (cursorCategoryIndex === 0 && cursorEmojiIndex === 0) {
                 resetCursorPosition();
                 event.currentTarget.selectionStart = value.length;
                 event.currentTarget.selectionEnd = value.length;
                 event.preventDefault();
-
                 focus();
             }
             break;
         case 'ArrowUp':
             event.preventDefault();
-
             if (event.shiftKey) {
                 // If Shift + Ctrl/Cmd + Up is pressed at any time, select/highlight the string to the left of the cursor.
                 event.currentTarget.selectionStart = 0;
-            } else if (cursor[0] === -1) {
+            } else if (cursorCategoryIndex === -1) {
                 // If cursor is on the textbox, set the cursor to the beginning of the string.
                 event.currentTarget.selectionStart = 0;
                 event.currentTarget.selectionEnd = 0;
-            } else if (cursor[0] === 0 && cursor[1] < EMOJI_PER_ROW) {
+            } else if (cursorCategoryIndex === 0 && cursorEmojiIndex < EMOJI_PER_ROW) {
                 // If the cursor is highlighting an emoji in the top row, move the cursor back into the text box to the end of the string.
                 resetCursorPosition();
                 event.currentTarget.selectionStart = value.length;
                 event.currentTarget.selectionEnd = value.length;
-
                 focus();
             } else {
                 // Otherwise, move the emoji selector up a row.
@@ -88,7 +87,6 @@ const EmojiPickerSearch = forwardRef<HTMLInputElement, Props>(({value, customEmo
             break;
         case 'ArrowDown':
             event.preventDefault();
-
             if (event.shiftKey) {
                 // If Shift + Ctrl/Cmd + Down is pressed at any time, select/highlight the string to the right of the cursor.
                 event.currentTarget.selectionEnd = value.length;

@@ -49,8 +49,8 @@ export const CATEGORIES: Categories = Emoji.CategoryNames.
     }, {} as Categories);
 
 export const EMOJI_PER_ROW = 9; // needs to match variable `$emoji-per-row` in _variables.scss
-export const EMOJI_ROW_HEIGHT = 36; //as per .emoji-picker__item height in _emoticons.scss
-export const CATEGORY_HEADER_ROW_HEIGHT = 26;
+export const ITEM_HEIGHT = 36; //as per .emoji-picker__item height in _emoticons.scss
+export const EMOJI_CONTAINER_HEIGHT = 290; // If this changes, the spaceRequiredAbove and spaceRequiredBelow props passed to the EmojiPickerOverlay must be updated
 
 export const CURSOR_DIRECTION: Record<'NEXT' | 'PREVIOUS', EmojiCursorDirection> = {
     NEXT: 'next',

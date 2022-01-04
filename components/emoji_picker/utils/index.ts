@@ -20,7 +20,7 @@ import EmojiMap from 'utils/emoji_map';
 import {
     CATEGORY_HEADER_ROW_HEIGHT,
     EMOJI_PER_ROW,
-    EMOJI_ROW_HEIGHT,
+    ITEM_HEIGHT,
     CATEGORY_HEADER_ROW,
     EMOJIS_ROW,
     SEARCH_RESULTS,
@@ -243,7 +243,7 @@ export function calculateCategoryOffsetsAndIndices(
         // is equal to all previous offset + current category's offset
         const approxRowsHeightTillNextCategory =
             allPreviousCategoriesOffsets +
-            numberOfEmojiRows * EMOJI_ROW_HEIGHT +
+            numberOfEmojiRows * ITEM_HEIGHT +
             CATEGORY_HEADER_ROW_HEIGHT;
         allPreviousCategoriesOffsets = approxRowsHeightTillNextCategory;
 
@@ -267,13 +267,29 @@ export function calculateCategoryOffsetsAndIndices(
     return categoriesOffsetsAndIndices;
 }
 
+export function calculateCategoryRowIndex(categories: Categories, categoryName: EmojiCategory) {
+    const categoryIndex = Object.keys(categories).findIndex((category) => category === categoryName);
+
+    const categoriesTillCurrentCategory = Object.values(categories).slice(0, categoryIndex);
+
+    const rowIndex = categoriesTillCurrentCategory.reduce((previousIndexSum, currentCategory) => {
+        const emojisInCurrentCategory = currentCategory?.emojiIds?.length ?? 0;
+
+        const numberOfEmojiRowsInCurrentCategory = Math.ceil(emojisInCurrentCategory / EMOJI_PER_ROW);
+
+        return previousIndexSum + numberOfEmojiRowsInCurrentCategory + 1;
+    }, 0);
+
+    return rowIndex;
+}
+
 function splitEmojisToRows(emojis: Emoji[], categoryIndex: number, categoryName: EmojiCategory, rowIndexCounter: number): [Array<CategoryOrEmojiRow<typeof EMOJIS_ROW>>, number] {
     if (emojis.length === 0) {
         return [[], rowIndexCounter - 1];
     }
 
     const emojiRows: Array<CategoryOrEmojiRow<typeof EMOJIS_ROW>> = [];
-    let emojisIndividualRow: CategoryOrEmojiRow<typeof EMOJIS_ROW>['row'] = [];
+    let emojisIndividualRow: CategoryOrEmojiRow<typeof EMOJIS_ROW>['items'] = [];
     let emojiRowIndexCounter = rowIndexCounter;
 
     // create `EMOJI_PER_ROW` row lenght array of emojis
@@ -283,14 +299,14 @@ function splitEmojisToRows(emojis: Emoji[], categoryIndex: number, categoryName:
             categoryName,
             emojiIndex,
             emojiId: emoji.category === CUSTOM ? emoji.id as string : emoji.unified as string,
-            emoji,
+            item: emoji,
         });
 
         if ((emojiIndex + 1) % EMOJI_PER_ROW === 0) {
             emojiRows.push({
+                index: emojiRowIndexCounter,
                 type: EMOJIS_ROW,
-                rowIndex: emojiRowIndexCounter,
-                row: emojisIndividualRow,
+                items: emojisIndividualRow,
             });
 
             emojiRowIndexCounter++;
@@ -301,9 +317,9 @@ function splitEmojisToRows(emojis: Emoji[], categoryIndex: number, categoryName:
     // if there are emojis left over that is less than `EMOJI_PER_ROW`, add them in next row
     if (emojisIndividualRow.length) {
         emojiRows.push({
+            index: emojiRowIndexCounter,
             type: EMOJIS_ROW,
-            rowIndex: emojiRowIndexCounter,
-            row: emojisIndividualRow,
+            items: emojisIndividualRow,
         });
 
         emojiRowIndexCounter++;
@@ -336,14 +352,14 @@ export function createCategoryAndEmojiRows(
         const filteredEmojis = getFilteredEmojis(allEmojis, filter, categories[RECENT]?.emojiIds ?? []);
 
         const searchCategoryRow: CategoryOrEmojiRow<typeof CATEGORY_HEADER_ROW> = {
+            index: 0,
             type: CATEGORY_HEADER_ROW,
-            rowIndex: 0,
-            row: [{
+            items: [{
                 categoryIndex: 0,
                 categoryName: SEARCH_RESULTS,
                 emojiIndex: -1,
                 emojiId: '',
-                emoji: null,
+                item: categories.searchResults,
             }],
         };
         const [searchEmojisRows] = splitEmojisToRows(filteredEmojis, 0, SEARCH_RESULTS, 1);
@@ -362,16 +378,15 @@ export function createCategoryAndEmojiRows(
         );
 
         // Add for the category header
-
         const categoryRow: CategoryOrEmojiRow<typeof CATEGORY_HEADER_ROW> = {
+            index: rowIndexCounter,
             type: CATEGORY_HEADER_ROW,
-            rowIndex: rowIndexCounter,
-            row: [{
+            items: [{
                 categoryIndex,
                 categoryName: categoryName as EmojiCategory,
                 emojiIndex: -1,
                 emojiId: '',
-                emoji: null,
+                item: categories[categoryName as EmojiCategory],
             }],
         };
 

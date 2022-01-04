@@ -5,7 +5,8 @@ import React, {memo} from 'react';
 import {FormattedMessage} from 'react-intl';
 import classNames from 'classnames';
 
-import {Category} from 'components/emoji_picker/types';
+import {Category, CategoryOrEmojiRow} from 'components/emoji_picker/types';
+import {EmojiCategory} from 'mattermost-redux/types/emojis';
 
 import {Constants} from 'utils/constants';
 
@@ -14,17 +15,21 @@ import Tooltip from 'components/tooltip';
 
 interface Props {
     category: Category;
+    categoryRowIndex: CategoryOrEmojiRow['index'];
+    categoryIndex: number;
     selected: boolean;
     enable: boolean;
-    onClick: (categoryName: string) => void;
+    onClick: (categoryRowIndex: CategoryOrEmojiRow['index'], categoryIndex: number, categoryName: EmojiCategory, firstEmojiId: string) => void;
 }
 
-function EmojiPickerCategory({category, selected, enable, onClick}: Props) {
+function EmojiPickerCategory({category, categoryIndex, categoryRowIndex, selected, enable, onClick}: Props) {
     const handleClick = (event: React.MouseEvent) => {
         event.preventDefault();
 
         if (enable) {
-            onClick(category.name);
+            const firstEmojiId = category?.emojiIds?.[0] ?? '';
+
+            onClick(categoryRowIndex, categoryIndex, category.name, firstEmojiId);
         }
     };
 

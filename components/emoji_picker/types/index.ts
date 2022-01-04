@@ -21,18 +21,18 @@ export type Categories = Record<EmojiCategory, Category>;
 export type CategoryOrEmojiRow<
     Type = typeof CATEGORY_HEADER_ROW | typeof EMOJIS_ROW
 > = {
+    index: number;
     type: Type extends typeof CATEGORY_HEADER_ROW
         ? typeof CATEGORY_HEADER_ROW
         : typeof EMOJIS_ROW;
-    rowIndex: number;
-    row: Array<{
+    items: Array<{
         categoryIndex: number;
         categoryName: EmojiCategory;
         emojiIndex: Type extends typeof CATEGORY_HEADER_ROW ? -1 : number;
         emojiId: Type extends typeof CATEGORY_HEADER_ROW
             ? ''
             : NonNullable<Emoji['id']>;
-        emoji: Type extends typeof CATEGORY_HEADER_ROW ? null : Emoji;
+        item: Type extends typeof CATEGORY_HEADER_ROW ? Category : Emoji;
     }>;
 };
 

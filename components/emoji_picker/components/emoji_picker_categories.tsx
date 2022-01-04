@@ -5,9 +5,17 @@ import React, {KeyboardEvent, memo, useMemo} from 'react';
 
 import {EmojiCategory} from 'mattermost-redux/types/emojis';
 
-import {Categories, EmojiCursorDirection} from 'components/emoji_picker/types';
+import {
+    Categories,
+    CategoryOrEmojiRow,
+    EmojiCursorDirection,
+} from 'components/emoji_picker/types';
 
-import {CURSOR_DIRECTION, EMOJI_PER_ROW} from 'components/emoji_picker/constants';
+import {
+    CURSOR_DIRECTION,
+    EMOJI_PER_ROW,
+} from 'components/emoji_picker/constants';
+import {calculateCategoryRowIndex} from 'components/emoji_picker/utils';
 
 import EmojiPickerCategory from 'components/emoji_picker/components/emoji_picker_category';
 
@@ -15,8 +23,11 @@ interface Props {
     categories: Categories;
     isFiltering: boolean;
     active: EmojiCategory;
-    onClick: (categoryName: string) => void;
-    selectNextOrPrevEmoji: (offset: number, direction: EmojiCursorDirection) => void;
+    onClick: (categoryRowIndex: CategoryOrEmojiRow['index'], categoryIndex: number, categoryName: EmojiCategory, firstEmojiId: string) => void;
+    selectNextOrPrevEmoji: (
+        offset: number,
+        direction: EmojiCursorDirection
+    ) => void;
     focusOnSearchInput: () => void;
 }
 
@@ -51,21 +62,28 @@ function EmojiPickerCategories({
         focusOnSearchInput();
     };
 
-    const activeCategory = isFiltering ? Object.keys(categories)[0] : active;
+    const categoryNames = Object.keys(categories) as EmojiCategory[];
+    const activeCategory = isFiltering ? categoryNames[0] : active;
 
-    const emojiPickerCategories = useMemo(() => Object.keys(categories).map((categoryName) => {
-        const category = categories[categoryName as EmojiCategory];
+    const categoryNamesDependency = Object.values(categories).map((category) => `${category.id}-${category?.emojiIds?.length}`).join(',');
+
+    const emojiPickerCategories = useMemo(() => categoryNames.map((categoryName, index) => {
+        const category = categories[categoryName];
+        const categoryRowIndex = calculateCategoryRowIndex(categories, categoryName);
+        const categoryIndex = index;
 
         return (
             <EmojiPickerCategory
-                key={'header-' + category.name}
+                key={categoryIndex + category.name}
                 category={category}
+                categoryIndex={categoryIndex}
+                categoryRowIndex={categoryRowIndex}
                 onClick={onClick}
                 selected={activeCategory === category.name}
                 enable={!isFiltering}
             />
         );
-    }), [Object.keys(categories), isFiltering, active]);
+    }), [categoryNamesDependency, isFiltering, active]);
 
     return (
         <div

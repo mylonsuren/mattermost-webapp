@@ -21,9 +21,9 @@ interface Props extends ListChildComponentProps<CategoryOrEmojiRow[]> {
 }
 
 function EmojiPickerCategoryOrEmojiRow({index, style, data, cursorCategoryIndex, cursorEmojiIndex, onEmojiClick, onEmojiMouseOver}: Props) {
-    const emojisRow = data[index].row as CategoryOrEmojiRow<typeof EMOJIS_ROW>['row'];
+    const emojisRow = data[index].items as CategoryOrEmojiRow<typeof EMOJIS_ROW>['items'];
     const emojisRowIds = emojisRow.map((emoji) => emoji.categoryIndex + emoji.categoryName + emoji.emojiId + emoji.emojiIndex).join('--');
-    const rowIndex = data[index].rowIndex;
+    const rowIndex = data[index].index;
 
     const emojisInARow = useMemo(() => {
         if (data[index].type !== EMOJIS_ROW) {
@@ -31,7 +31,7 @@ function EmojiPickerCategoryOrEmojiRow({index, style, data, cursorCategoryIndex,
         }
 
         return emojisRow.map((emojiColumn) => {
-            const emoji = emojiColumn.emoji;
+            const emoji = emojiColumn.item;
             const isSelected = emojiColumn.categoryIndex === cursorCategoryIndex &&
                 emojiColumn.emojiIndex === cursorEmojiIndex;
 
@@ -54,7 +54,7 @@ function EmojiPickerCategoryOrEmojiRow({index, style, data, cursorCategoryIndex,
     if (data[index].type === CATEGORY_HEADER_ROW) {
         return (
             <EmojiPickerCategorySection
-                categoryName={data[index].row[0].categoryName}
+                categoryName={data[index].items[0].categoryName}
                 style={style}
             />
         );
