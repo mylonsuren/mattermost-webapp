@@ -202,7 +202,7 @@ type State = {
 };
 
 function isDraftEmpty(draft: PostDraft): boolean {
-    return !draft || (!draft.message && draft.fileInfos.length === 0);
+    return !draft || (!draft.message.trim().length && draft.fileInfos.length === 0);
 }
 
 class AdvancedCreateComment extends React.PureComponent<Props, State> {
